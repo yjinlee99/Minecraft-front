@@ -1,7 +1,8 @@
 <template>
     <div class="shop-page">
         <div class="card-grid">
-            <SkinCard v-for="item in paginatedItems" :key="item.id" :item="item" />
+            <SkinCard v-for="item in paginatedItems" :key="item.id" :item="item" @logout="handleLogout" />
+            <!-- @logout 추가 -->
         </div>
         <div class="pagination">
             <button v-for="page in totalPages" :key="page" :class="{ active: page === currentPage }"
@@ -13,6 +14,7 @@
 </template>
 
 <script>
+import apiClient from '../axios';
 import SkinCard from './SkinCard.vue';
 
 export default {
@@ -22,15 +24,9 @@ export default {
     },
     data() {
         return {
-            items: [ // 예시 아이템 목록
-                { id: 1, name: 'Item 1', price: 100, image: 'https://via.placeholder.com/150' },
-                { id: 2, name: 'Item 2', price: 150, image: 'https://via.placeholder.com/150' },
-                { id: 3, name: 'Item 3', price: 150, image: 'https://via.placeholder.com/150' },
-                { id: 4, name: 'Item 4', price: 150, image: 'https://via.placeholder.com/150' },
-                // 더 많은 아이템을 여기에 추가
-            ],
+            items: [],
             currentPage: 1,
-            itemsPerPage: 18, // 한 페이지에 표시할 카드 수 (3 x 6)
+            itemsPerPage: 18,
         };
     },
     computed: {
@@ -44,9 +40,23 @@ export default {
         },
     },
     methods: {
+        async fetchItems() {
+            try {
+                const response = await apiClient.get('/api/store');
+                this.items = response.data;
+            } catch (error) {
+                console.error('Failed to fetch items:', error);
+            }
+        },
         goToPage(page) {
             this.currentPage = page;
         },
+        handleLogout() {
+            this.$emit('logout'); // 상위 컴포넌트인 App.vue로 이벤트 전송
+        },
+    },
+    mounted() {
+        this.fetchItems();
     },
 };
 </script>
