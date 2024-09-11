@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import ShopPage from '../components/ShopPage.vue';
 import LoginPage from '../components/LoginPage.vue';
 import HeaderBar from '../components/HeaderBar.vue';
+import PaymentComplete from '../components/PaymentComplete.vue';
 
 const routes = [
     {
@@ -19,6 +20,11 @@ const routes = [
             default: LoginPage,
             header: HeaderBar, // 헤더를 유지하려면 이렇게 등록
         },
+    },
+    {
+        path: '/payment-complete',
+        name: 'PaymentComplete',
+        component: PaymentComplete, // 결제 완료 페이지 경로 추가
     },
 ];
 

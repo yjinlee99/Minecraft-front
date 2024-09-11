@@ -36,7 +36,7 @@ export default {
         async buyItem() {
             try {
                 // 1. 서버에 주문 생성 요청 (JWT 토큰 포함)
-                const orderResponse = await apiClient.post('/api/order/create', {
+                const orderResponse = await apiClient.post('/api/order/v1/create', {
                     itemId: this.item.id
                 }, {
                     headers: {
@@ -50,12 +50,12 @@ export default {
 
                 console.log(MemberId + MemberUsername);
 
-                // 2. Bootpay 결제 요청
+                // 2. Bootpay 결제 요청 (분리승인 옵션 추가)
                 const paymentResponse = await Bootpay.requestPayment({
                     application_id: '66d43bf5cc5274a3ac3fc16f',
                     price: this.item.price,
                     order_name: this.item.name,
-                    order_id: orderId, // 서버에서 생성한 주문 ID 사용
+                    order_id: orderId,
                     pg: '토스',
                     method: '카드',
                     tax_free: 0,
@@ -68,6 +68,7 @@ export default {
                     extra: {
                         open_type: 'iframe',
                         escrow: false,
+                        separately_confirmed: true, // 분리승인 활성화
                     },
                 });
 
@@ -91,17 +92,38 @@ export default {
             this.$router.push('/login'); // 로그인 페이지로 리디렉션
         },
 
-        verifyPayment(receipt_id) {
-            // 결제 검증 요청을 서버에 전송
-            apiClient.post('/api/payment/verify', { receipt_id })
-                .then(response => {
-                    console.log('결제 검증 성공:', response.data);
-                    alert('결제가 성공적으로 처리되었습니다.');
-                })
-                .catch(error => {
-                    console.error('결제 검증 실패:', error);
-                    alert('결제 검증에 실패했습니다.');
-                });
+        async verifyPayment(receipt_id) {
+            try {
+                // 결제 검증 요청을 서버에 전송
+                const response = await apiClient.post('/api/order/v1/verify', { receipt_id });
+
+                console.log('결제 검증 성공:', response.data);
+
+                // 결제가 검증되면 분리승인 요청
+                this.approvePayment(receipt_id);
+            } catch (error) {
+                // 결제 검증에서 오류가 발생하면 분리승인 요청을 보내지 않음
+                console.error('결제 검증 실패:', error);
+                alert('결제 검증에 실패했습니다.');
+                Bootpay.destroy();
+            }
+        },
+
+        async approvePayment(receipt_id) {
+            try {
+                // 서버에 결제 승인 요청
+                const response = await apiClient.post('/api/order/v1/approve', { receipt_id });
+
+                console.log('결제 승인 성공:', response.data);
+
+                Bootpay.destroy();
+                this.$router.push('/payment-complete');
+
+            } catch (error) {
+                console.error('결제 승인 실패:', error);
+                alert('결제 승인에 실패했습니다.');
+                Bootpay.destroy();
+            }
         },
     },
 };
