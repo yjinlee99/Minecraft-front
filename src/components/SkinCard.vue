@@ -73,7 +73,7 @@ export default {
                 });
 
                 console.log('결제 성공:', paymentResponse);
-                this.verifyPayment(paymentResponse.receipt_id);
+                this.verifyPayment(paymentResponse.receipt_id, this.item.id);
             } catch (error) {
                 // JWT 토큰이 유효하지 않다면 로그아웃 처리
                 if (error.response && error.response.status === 500) {
@@ -92,15 +92,21 @@ export default {
             this.$router.push('/login'); // 로그인 페이지로 리디렉션
         },
 
-        async verifyPayment(receipt_id) {
+        async verifyPayment(receipt_id, item_id) {
             try {
                 // 결제 검증 요청을 서버에 전송
-                const response = await apiClient.post('/api/order/v1/verify', { receipt_id });
+                const response = await apiClient.post('/api/order/v1/verify', { receipt_id },
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                        }
+                    }
+                );
 
                 console.log('결제 검증 성공:', response.data);
 
                 // 결제가 검증되면 분리승인 요청
-                this.approvePayment(receipt_id);
+                this.approvePayment(receipt_id, item_id);
             } catch (error) {
                 // 결제 검증에서 오류가 발생하면 분리승인 요청을 보내지 않음
                 console.error('결제 검증 실패:', error);
@@ -109,10 +115,16 @@ export default {
             }
         },
 
-        async approvePayment(receipt_id) {
+        async approvePayment(receipt_id, item_id) {
             try {
                 // 서버에 결제 승인 요청
-                const response = await apiClient.post('/api/order/v1/approve', { receipt_id });
+                const response = await apiClient.post('/api/order/v1/approve', { receipt_id, item_id },
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                        }
+                    }
+                );
 
                 console.log('결제 승인 성공:', response.data);
 

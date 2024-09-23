@@ -5,6 +5,7 @@
         </div>
         <div class="header-right">
             <span v-if="isLoggedIn">
+                <router-link to="/my-items">My Items</router-link>
                 {{ username }}
                 <button @click="logout">Logout</button>
             </span>

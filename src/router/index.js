@@ -3,6 +3,7 @@ import ShopPage from '../components/ShopPage.vue';
 import LoginPage from '../components/LoginPage.vue';
 import HeaderBar from '../components/HeaderBar.vue';
 import PaymentComplete from '../components/PaymentComplete.vue';
+import MyItems from '../components/MyItems.vue'
 
 const routes = [
     {
@@ -24,7 +25,19 @@ const routes = [
     {
         path: '/payment-complete',
         name: 'PaymentComplete',
-        component: PaymentComplete, // 결제 완료 페이지 경로 추가
+        components: {
+            default: PaymentComplete,
+            header: HeaderBar,
+        },
+    },
+    {
+        path: '/my-items', // My Item 경로
+        name: 'MyItems',
+        components: {
+            default: MyItems,
+            header: HeaderBar,
+        },
+
     },
 ];
 
