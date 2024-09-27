@@ -47,7 +47,7 @@ export default {
         async selectSkin(item) {
             try {
                 // 서버로 선택한 스킨 정보를 전송하여 업데이트
-                await apiClient.post('/api/items/select', { skinId: item.id }, {
+                await apiClient.post('/api/user-item/select', { skinId: item.id }, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
                     },

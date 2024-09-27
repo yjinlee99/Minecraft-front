@@ -42,7 +42,16 @@ export default {
     methods: {
         async fetchItems() {
             try {
-                const response = await apiClient.get('/api/store');
+                const jwtToken = localStorage.getItem('jwt');
+                const config = {};
+
+                if (jwtToken) {
+                    config.headers = {
+                        'Authorization': `Bearer ${jwtToken}`,
+                    };
+                }
+
+                const response = await apiClient.get('/api/store', config);
                 this.items = response.data;
             } catch (error) {
                 console.error('Failed to fetch items:', error);
